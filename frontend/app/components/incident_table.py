@@ -1,4 +1,4 @@
-from nicegui import ui
+from app.utils.ui_stub import ui
 from typing import List
 
 

@@ -1,4 +1,4 @@
-from nicegui import ui
+from app.utils.ui_stub import ui
 
 from app.components.page_header import PageHeader
 from app.clients.api_client import ApiClient
