@@ -46,7 +46,10 @@ def get_all_incidents() -> list[IncidentResponse]:
     "/queue/next",
     response_model=IncidentResponse | None,
     summary="Get next incident",
-    description="Return the first open incident found until the priority queue integration is added.",
+    description=(
+        "Return the first open incident found. This is a temporary implementation "
+        "until PriorityQueueManager is integrated by Team Member 2."
+    ),
 )
 def get_next_incident() -> IncidentResponse | None:
     """Return the next open incident to attend."""

@@ -9,8 +9,22 @@ from app.schemas.error_schema import ErrorResponse
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="API for managing and prioritizing university campus incidents.",
+    description=(
+        "REST API for registering, listing, assigning, and temporarily prioritizing "
+        "university campus incidents. This version contains the Backend/API Developer "
+        "scope only and uses an in-memory repository."
+    ),
     version=settings.API_VERSION,
+    openapi_tags=[
+        {
+            "name": "System",
+            "description": "General API status and health endpoints.",
+        },
+        {
+            "name": "Incidents",
+            "description": "Endpoints for campus incident registration and management.",
+        },
+    ],
 )
 
 app.include_router(incident_router)
@@ -44,13 +58,23 @@ async def validation_exception_handler(
     return JSONResponse(status_code=422, content=error_response.model_dump())
 
 
-@app.get("/")
+@app.get(
+    "/",
+    tags=["System"],
+    summary="API status",
+    description="Return a basic message confirming that the CampusCare API is running.",
+)
 def read_root() -> dict[str, str]:
     """Return a basic API status message."""
     return {"message": "CampusCare API is running."}
 
 
-@app.get("/health")
+@app.get(
+    "/health",
+    tags=["System"],
+    summary="Health check",
+    description="Return the current health status of the API service.",
+)
 def health_check() -> dict[str, str]:
     """Return the service health status."""
     return {"status": "healthy"}

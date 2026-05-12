@@ -1,9 +1,15 @@
 from fastapi.testclient import TestClient
 
+from app.api.incident_routes import incident_service
 from app.main import app
+from app.repositories.incident_repository import IncidentRepository
 
 
 client = TestClient(app)
+
+
+def setup_function() -> None:
+    incident_service.repository = IncidentRepository()
 
 
 def build_incident_payload() -> dict[str, str]:
@@ -92,8 +98,14 @@ def test_get_next_incident_returns_open_incident() -> None:
 
     assert response.status_code == 200
     assert response.json()["status"] == "OPEN"
-    assert response.json()["id"] is not None
-    assert created_incident["id"]
+    assert response.json()["id"] == created_incident["id"]
+
+
+def test_get_next_incident_returns_null_when_no_open_incidents_exist() -> None:
+    response = client.get("/api/incidents/queue/next")
+
+    assert response.status_code == 200
+    assert response.json() is None
 
 
 def test_create_incident_returns_422_when_payload_is_invalid() -> None:

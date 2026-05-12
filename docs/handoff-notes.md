@@ -30,6 +30,7 @@ Se validó:
 - Asignación de responsable.
 - Validación de payload inválido con error 422.
 - Endpoint temporal para siguiente incidente abierto.
+- Endpoint temporal para siguiente incidente cuando no hay incidentes abiertos.
 
 ## Comandos usados
 
@@ -95,4 +96,4 @@ Advertencia: cada vez que se reinicia el servidor, el diccionario se limpia y lo
 
 ## Estado final para entrega
 
-El backend queda funcional en estado inicial, documentado en español y listo para que otro integrante o grupo continúe sin depender de explicaciones externas.
+El backend queda funcional en estado inicial, documentado en español y listo para que otro integrante o grupo continúe sin depender de explicaciones externas. Este bloque cierra el alcance principal del Integrante 1.

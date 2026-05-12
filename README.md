@@ -186,7 +186,7 @@ python -m pytest
 Actualmente pasan las pruebas básicas del backend. La última validación ejecutada en este bloque fue:
 
 ```text
-9 passed
+10 passed
 ```
 
 ## Decisiones técnicas del Integrante 1
@@ -222,6 +222,6 @@ Actualmente pasan las pruebas básicas del backend. La última validación ejecu
 
 ## Estado actual del backend
 
-El backend está en estado funcional inicial y listo para continuar. Las rutas principales existen, las validaciones están activas, los errores tienen formato uniforme y las pruebas básicas pasan.
+El backend está en estado funcional inicial y listo para continuar. Las rutas principales existen, las validaciones están activas, los errores tienen formato uniforme y las pruebas básicas pasan. Este bloque deja cerrado el alcance principal del Integrante 1.
 
 La información se guarda en memoria, por lo tanto los incidentes creados se pierden al reiniciar el servidor.
