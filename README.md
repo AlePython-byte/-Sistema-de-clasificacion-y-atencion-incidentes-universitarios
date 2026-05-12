@@ -10,7 +10,9 @@ El sistema busca organizar los reportes de incidentes para que puedan ser atendi
 
 ## Alcance actual
 
-Este avance corresponde al Integrante 1: Backend/API Developer.
+Este proyecto cuenta con los avances de los siguientes integrantes:
+
+### Integrante 1: Backend/API Developer
 
 Incluye:
 
@@ -22,6 +24,15 @@ Incluye:
 - Pruebas básicas con pytest.
 - Documentación Swagger automática.
 
+### Integrante 2: Estructuras de datos y dominio
+
+Se han implementado estructuras de datos reales sin afectar los endpoints actuales:
+
+- **PriorityQueueManager (`priority_queue.py`)**: Cola de prioridad basada en `heapq` para priorizar incidentes críticos.
+- **IncidentHistoryStack (`history_stack.py`)**: Pila (LIFO) para guardar historial de cambios.
+- **CategoryTree (`category_tree.py`)**: Árbol jerárquico para categorías y subcategorías.
+- Pruebas unitarias completas de las estructuras en `test_structures.py`.
+
 ## Lo que NO incluye todavía
 
 Este bloque todavía no incluye:
@@ -30,8 +41,7 @@ Este bloque todavía no incluye:
 - Base de datos real.
 - Autenticación.
 - Roles de usuario.
-- Estructuras avanzadas.
-- Cola de prioridad real.
+- Enlace de las nuevas estructuras con los endpoints (por ahora solo están probadas).
 - Reportes avanzados.
 - Persistencia después de reiniciar el servidor.
 
@@ -67,10 +77,16 @@ campuscare/
 |   |   +-- repositories/
 |   |   |   +-- __init__.py
 |   |   |   +-- incident_repository.py
+|   |   +-- structures/
+|   |   |   +-- __init__.py
+|   |   |   +-- category_tree.py
+|   |   |   +-- history_stack.py
+|   |   |   +-- priority_queue.py
 |   |   +-- tests/
 |   |       +-- __init__.py
 |   |       +-- test_health.py
 |   |       +-- test_incident_routes.py
+|   |       +-- test_structures.py
 |   +-- requirements.txt
 +-- docs/
 |   +-- backend-overview.md
