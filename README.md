@@ -79,6 +79,7 @@ campuscare/
 |   +-- integration-plan.md
 |   +-- team-handoff.md
 |   +-- git-workflow.md
+|   +-- data-structures.md
 +-- README.md
 +-- .gitignore
 ```
@@ -199,6 +200,7 @@ Antes de continuar el proyecto, revisar estos documentos:
 - `docs/integration-plan.md`: plan para integrar ramas, validar cambios y proteger la estabilidad de `main`.
 - `docs/team-handoff.md`: resumen operativo para cambio de integrante o cambio de grupo.
 - `docs/git-workflow.md`: flujo recomendado de Git para trabajar por ramas y resolver merges.
+- `docs/data-structures.md`: explicación de las estructuras creadas por el Integrante 2.
 
 Validación mínima antes de entregar o mezclar cambios:
 
