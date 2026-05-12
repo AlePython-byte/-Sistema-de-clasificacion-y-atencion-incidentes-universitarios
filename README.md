@@ -25,8 +25,6 @@ Incluye:
 ## Lo que NO incluye todavía
 
 Este bloque todavía no incluye:
-
-- Frontend.
 - Base de datos real.
 - Autenticación.
 - Roles de usuario.
@@ -72,9 +70,24 @@ campuscare/
 |   |       +-- test_health.py
 |   |       +-- test_incident_routes.py
 |   +-- requirements.txt
+|   +-- docs/
+|   +-- handoff-notes.md
++-- frontend/
+|   +-- app/
+|   |   +-- main.py
+|   |   +-- clients/
+|   |   |   +-- api_client.py
+|   |   +-- pages/
+|   |   |   +-- dashboard_page.py
+|   |   |   +-- incidents_page.py
+|   |   |   +-- queue_page.py
+|   |   +-- components/
+|   |       +-- __init__.py
+|   +-- requirements.txt
 +-- docs/
 |   +-- backend-overview.md
 |   +-- api-endpoints.md
+|   +-- frontend-overview.md
 |   +-- handoff-notes.md
 +-- README.md
 +-- .gitignore
@@ -97,6 +110,20 @@ Si `uvicorn` no se reconoce por el PATH de Windows, usar:
 ```powershell
 python -m uvicorn app.main:app --reload
 ```
+
+## Ejecución del Frontend
+
+Una vez que el backend esté corriendo, abre una nueva terminal y ejecuta:
+
+```powershell
+cd frontend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+streamlit run app/main.py
+```
+
+Esto abrirá la aplicación web en tu navegador, lista para usar en español.
 
 ## Acceso a Swagger
 
