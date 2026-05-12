@@ -9,6 +9,8 @@ from app.schemas.incident_schema import (
     IncidentCreateRequest,
     IncidentResponse,
     IncidentUpdateStatusRequest,
+    IncidentStatus,
+    UrgencyLevel,
 )
 
 
@@ -24,9 +26,9 @@ class IncidentService:
             "category": request.category,
             "location": request.location,
             "reported_by": request.reported_by,
-            "urgency_level": request.urgency_level,
+            "urgency_level": request.urgency_level.value,
             "priority": self._calculate_priority(request.urgency_level),
-            "status": "OPEN",
+            "status": IncidentStatus.OPEN.value,
             "assigned_to": None,
             "created_at": datetime.now(timezone.utc),
         }
@@ -38,11 +40,7 @@ class IncidentService:
         return [IncidentResponse(**incident) for incident in self.repository.find_all()]
 
     def get_incident_by_id(self, incident_id: str) -> IncidentResponse:
-        incident = self.repository.find_by_id(incident_id)
-        if incident is None:
-            raise HTTPException(status_code=404, detail="Incident not found.")
-
-        return IncidentResponse(**incident)
+        return IncidentResponse(**self._get_existing_incident(incident_id))
 
     def update_status(
         self,
@@ -51,12 +49,9 @@ class IncidentService:
     ) -> IncidentResponse:
         updated_incident = self.repository.update(
             incident_id,
-            {"status": request.status},
+            {"status": request.status.value},
         )
-        if updated_incident is None:
-            raise HTTPException(status_code=404, detail="Incident not found.")
-
-        return IncidentResponse(**updated_incident)
+        return IncidentResponse(**self._ensure_updated(updated_incident))
 
     def assign_incident(
         self,
@@ -67,18 +62,28 @@ class IncidentService:
             incident_id,
             {"assigned_to": request.assigned_to},
         )
-        if updated_incident is None:
-            raise HTTPException(status_code=404, detail="Incident not found.")
-
-        return IncidentResponse(**updated_incident)
+        return IncidentResponse(**self._ensure_updated(updated_incident))
 
     def get_next_incident(self) -> IncidentResponse | None:
         # TODO: Integrate PriorityQueueManager from Team Member 2.
         for incident in self.repository.find_all():
-            if incident["status"] == "OPEN":
+            if incident["status"] == IncidentStatus.OPEN.value:
                 return IncidentResponse(**incident)
 
         return None
 
-    def _calculate_priority(self, urgency_level: str) -> str:
-        return urgency_level
+    def _get_existing_incident(self, incident_id: str) -> dict:
+        incident = self.repository.find_by_id(incident_id)
+        if incident is None:
+            raise HTTPException(status_code=404, detail="Incident not found")
+
+        return incident
+
+    def _ensure_updated(self, incident: dict | None) -> dict:
+        if incident is None:
+            raise HTTPException(status_code=404, detail="Incident not found")
+
+        return incident
+
+    def _calculate_priority(self, urgency_level: UrgencyLevel) -> str:
+        return urgency_level.value

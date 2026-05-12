@@ -1,23 +1,57 @@
 from datetime import datetime
-from typing import Literal
+from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator
 
 
-UrgencyLevel = Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"]
-IncidentStatus = Literal["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]
+class UrgencyLevel(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+class IncidentStatus(str, Enum):
+    OPEN = "OPEN"
+    ASSIGNED = "ASSIGNED"
+    IN_PROGRESS = "IN_PROGRESS"
+    RESOLVED = "RESOLVED"
+    CLOSED = "CLOSED"
+
+
+class IncidentPriority(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
 
 
 class IncidentCreateRequest(BaseModel):
-    title: str = Field(..., min_length=1, examples=["Broken classroom projector"])
+    title: str = Field(
+        ...,
+        min_length=5,
+        max_length=100,
+        examples=["Broken classroom projector"],
+    )
     description: str = Field(
         ...,
-        min_length=1,
+        min_length=10,
+        max_length=500,
         examples=["The projector in room B-204 does not turn on."],
     )
-    category: str = Field(..., min_length=1, examples=["Technology"])
-    location: str = Field(..., min_length=1, examples=["Building B, room 204"])
-    reported_by: str = Field(..., min_length=1, examples=["student@example.edu"])
+    category: str = Field(..., min_length=1, max_length=80, examples=["Technology"])
+    location: str = Field(
+        ...,
+        min_length=1,
+        max_length=120,
+        examples=["Building B, room 204"],
+    )
+    reported_by: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        examples=["student@example.edu"],
+    )
     urgency_level: UrgencyLevel = Field(..., examples=["HIGH"])
 
     @field_validator("title", "description", "category", "location", "reported_by")
@@ -33,11 +67,17 @@ class IncidentUpdateStatusRequest(BaseModel):
 
 
 class IncidentAssignRequest(BaseModel):
-    assigned_to: str = Field(..., min_length=1, examples=["Maintenance Team"])
+    assigned_to: str | None = Field(
+        default=None,
+        max_length=100,
+        examples=["Maintenance Team"],
+    )
 
     @field_validator("assigned_to")
     @classmethod
-    def validate_assigned_to_not_blank(cls, value: str) -> str:
+    def validate_assigned_to_not_blank(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
         if not value.strip():
             raise ValueError("Assigned person or team cannot be empty.")
         return value.strip()
@@ -51,7 +91,7 @@ class IncidentResponse(BaseModel):
     location: str = Field(..., examples=["Building B, room 204"])
     reported_by: str = Field(..., examples=["student@example.edu"])
     urgency_level: UrgencyLevel = Field(..., examples=["HIGH"])
-    priority: UrgencyLevel = Field(..., examples=["HIGH"])
+    priority: IncidentPriority = Field(..., examples=["HIGH"])
     status: IncidentStatus = Field(..., examples=["OPEN"])
     assigned_to: str | None = Field(default=None, examples=["Maintenance Team"])
     created_at: datetime = Field(..., examples=["2026-05-12T10:30:00"])
