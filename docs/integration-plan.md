@@ -15,7 +15,8 @@ La rama `main` debe considerarse estable. Las ramas nuevas deben integrarse solo
 - Schemas de request y response.
 - ErrorResponse para errores consistentes.
 - Repositorio en memoria.
-- Servicio de incidentes con reglas simples.
+- Servicio de incidentes con reglas de prioridad e historial interno.
+- Estructuras de datos integradas parcialmente.
 - Swagger/OpenAPI configurado.
 - Pruebas básicas con pytest.
 - Documentación principal y documentación de apoyo en `docs/`.
@@ -25,8 +26,8 @@ La rama `main` debe considerarse estable. Las ramas nuevas deben integrarse solo
 - Frontend.
 - Base de datos real.
 - Autenticación y roles.
-- Cola de prioridad real.
-- Estructuras avanzadas.
+- Persistencia real para la cola y el historial.
+- Integración de `CategoryTree` al flujo principal.
 - Reglas de negocio más completas.
 - Reportes avanzados.
 - Persistencia después de reiniciar el servidor.

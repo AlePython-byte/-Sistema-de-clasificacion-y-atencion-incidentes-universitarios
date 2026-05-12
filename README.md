@@ -93,6 +93,7 @@ campuscare/
 |   +-- team-handoff.md
 |   +-- git-workflow.md
 |   +-- data-structures.md
+|   +-- business-rules.md
 +-- README.md
 +-- .gitignore
 ```
@@ -150,7 +151,7 @@ Swagger permite probar los endpoints desde el navegador y ver las validaciones g
 | GET | `/api/incidents/{incident_id}` | Busca un incidente por ID. | Funcional |
 | PATCH | `/api/incidents/{incident_id}/status` | Actualiza el estado de un incidente. | Funcional |
 | PATCH | `/api/incidents/{incident_id}/assign` | Asigna un responsable a un incidente. | Funcional |
-| GET | `/api/incidents/queue/next` | Devuelve el primer incidente abierto encontrado. | Temporal |
+| GET | `/api/incidents/queue/next` | Devuelve el incidente abierto con mayor prioridad. | Funcional en memoria |
 
 ## Ejemplo de creación de incidente
 
@@ -217,7 +218,7 @@ python -m pytest
 Actualmente pasan las pruebas básicas del backend. La última validación ejecutada en este bloque fue:
 
 ```text
-10 passed
+36 passed
 ```
 
 ## Guía rápida para nuevos integrantes
@@ -228,6 +229,7 @@ Antes de continuar el proyecto, revisar estos documentos:
 - `docs/team-handoff.md`: resumen operativo para cambio de integrante o cambio de grupo.
 - `docs/git-workflow.md`: flujo recomendado de Git para trabajar por ramas y resolver merges.
 - `docs/data-structures.md`: explicación de las estructuras creadas por el Integrante 2.
+- `docs/business-rules.md`: reglas de negocio e integración de estructuras del Integrante 3.
 
 Validación mínima antes de entregar o mezclar cambios:
 
@@ -243,15 +245,15 @@ python -m pytest
 - Se usa Pydantic para validar datos de entrada y salida.
 - Se usa un repositorio en memoria porque la persistencia real será responsabilidad de otro bloque futuro.
 - Se usa una arquitectura por capas para separar rutas, schemas, servicios y repositorios.
-- Se deja `get_next_incident` como implementación temporal hasta integrar una cola de prioridad real.
+- `get_next_incident` usa `PriorityQueueManager`, pero todavía trabaja con el repositorio en memoria.
 
 ## Recomendaciones para los siguientes integrantes
 
 ### Para Integrante 2
 
-- Implementar estructuras de datos avanzadas.
-- Integrar `PriorityQueueManager`.
-- Implementar `HistoryStack`.
+- Mantener y extender estructuras de datos avanzadas si aparecen nuevas reglas.
+- Revisar `PriorityQueueManager` si cambian los criterios de prioridad.
+- Revisar `HistoryStack` si se decide exponer historial públicamente.
 - Implementar `CategoryTree`.
 
 ### Para Integrante 3

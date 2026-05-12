@@ -4,9 +4,9 @@ Este documento describe las estructuras implementadas por el Integrante 2 para C
 
 ## Estado actual
 
-Las estructuras ya existen y tienen pruebas unitarias, pero todavía no están conectadas a `IncidentService` ni al endpoint `/api/incidents/queue/next`.
+Las estructuras ya existen y tienen pruebas unitarias. `PriorityQueueManager` e `IncidentHistoryStack` ya están integradas en `IncidentService`; `CategoryTree` sigue lista para una integración futura.
 
-La integración con el flujo principal debe realizarse después, idealmente por el Integrante 3 o en coordinación con el equipo, para evitar cambios de comportamiento no controlados.
+La integración debe mantenerse coordinada para evitar cambios de comportamiento no controlados.
 
 ## Archivos creados
 
@@ -34,7 +34,7 @@ Reglas importantes:
 - Si falta el campo `priority`, se usa `LOW` como valor por defecto.
 - Si dos incidentes tienen la misma prioridad, sale primero el que fue agregado primero.
 - Usa un contador interno para resolver empates.
-- Todavía no está conectado al endpoint `/api/incidents/queue/next`.
+- Ya se usa indirectamente desde el endpoint `/api/incidents/queue/next` a través de `IncidentService`.
 
 Métodos principales:
 
@@ -124,11 +124,9 @@ Cubren:
 
 ## Próximo paso para integración
 
-El Integrante 3 debe decidir cómo conectar estas estructuras al flujo del servicio principal.
+El Integrante 3 ya conectó `PriorityQueueManager` y `IncidentHistoryStack` al flujo del servicio principal.
 
-La integración recomendada es:
+Queda pendiente:
 
-- Usar `PriorityQueueManager` dentro de la lógica de priorización real.
-- Usar `IncidentHistoryStack` para registrar cambios de estado o asignación.
 - Usar `CategoryTree` para clasificar incidentes por categorías y subcategorías.
 - Mantener las rutas actuales para no romper el frontend ni Swagger.

@@ -170,9 +170,9 @@ Body esperado:
 |---|---|
 | Método | `GET` |
 | Ruta | `/api/incidents/queue/next` |
-| Propósito | Obtener el siguiente incidente abierto a atender. |
+| Propósito | Obtener el incidente abierto con mayor prioridad. |
 | Body | No requiere. |
-| Respuesta esperada | Primer incidente con estado `OPEN`, o `null` si no hay incidentes abiertos. |
+| Respuesta esperada | Incidente abierto con mayor prioridad, o `null` si no hay incidentes abiertos. |
 | Posibles errores | No se esperan errores funcionales en uso normal. |
 
-Nota importante: este endpoint es temporal. Todavía no implementa una cola de prioridad real.
+Nota importante: este endpoint ya usa `PriorityQueueManager`, pero todavía trabaja con datos en memoria.
