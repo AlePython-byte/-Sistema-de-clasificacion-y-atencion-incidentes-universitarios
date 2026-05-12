@@ -76,6 +76,9 @@ campuscare/
 |   +-- backend-overview.md
 |   +-- api-endpoints.md
 |   +-- handoff-notes.md
+|   +-- integration-plan.md
+|   +-- team-handoff.md
+|   +-- git-workflow.md
 +-- README.md
 +-- .gitignore
 ```
@@ -187,6 +190,22 @@ Actualmente pasan las pruebas básicas del backend. La última validación ejecu
 
 ```text
 10 passed
+```
+
+## Guía rápida para nuevos integrantes
+
+Antes de continuar el proyecto, revisar estos documentos:
+
+- `docs/integration-plan.md`: plan para integrar ramas, validar cambios y proteger la estabilidad de `main`.
+- `docs/team-handoff.md`: resumen operativo para cambio de integrante o cambio de grupo.
+- `docs/git-workflow.md`: flujo recomendado de Git para trabajar por ramas y resolver merges.
+
+Validación mínima antes de entregar o mezclar cambios:
+
+```powershell
+cd backend
+python -m compileall app
+python -m pytest
 ```
 
 ## Decisiones técnicas del Integrante 1
