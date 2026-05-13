@@ -1,58 +1,46 @@
 import heapq
-from typing import Any, List, Optional, Tuple
+from itertools import count
 
 
 class PriorityQueueManager:
-    """
-    Manages incidents based on their priority level.
-    Uses a min-heap where:
-    0: CRITICAL
-    1: HIGH
-    2: MEDIUM
-    3: LOW
-    """
-
-    PRIORITY_MAP = {
+    _PRIORITY_ORDER = {
         "CRITICAL": 0,
         "HIGH": 1,
         "MEDIUM": 2,
-        "LOW": 3
+        "LOW": 3,
     }
 
-    def __init__(self):
-        self._queue: List[Tuple[int, Any]] = []
+    def __init__(self) -> None:
+        self._heap: list[tuple[int, int, dict]] = []
+        self._counter = count()
 
-    def push(self, incident: Any, priority: str) -> None:
-        """
-        Adds an incident to the queue with the given priority.
-        """
-        priority_val = self.PRIORITY_MAP.get(priority.upper(), 3)
-        heapq.heappush(self._queue, (priority_val, incident))
+    def add_incident(self, incident: dict) -> None:
+        priority = self._get_priority_value(incident)
+        insertion_order = next(self._counter)
+        heapq.heappush(self._heap, (priority, insertion_order, incident))
 
-    def pop(self) -> Optional[Any]:
-        """
-        Removes and returns the incident with the highest priority (lowest value).
-        """
-        if not self._queue:
+    def get_next_incident(self) -> dict | None:
+        if self.is_empty():
             return None
-        return heapq.heappop(self._queue)[1]
 
-    def peek(self) -> Optional[Any]:
-        """
-        Returns the incident with the highest priority without removing it.
-        """
-        if not self._queue:
+        return heapq.heappop(self._heap)[2]
+
+    def peek_next_incident(self) -> dict | None:
+        if self.is_empty():
             return None
-        return self._queue[0][1]
+
+        return self._heap[0][2]
 
     def is_empty(self) -> bool:
-        """
-        Returns True if the queue is empty.
-        """
-        return len(self._queue) == 0
+        return len(self._heap) == 0
 
     def size(self) -> int:
-        """
-        Returns the number of items in the queue.
-        """
-        return len(self._queue)
+        return len(self._heap)
+
+    def clear(self) -> None:
+        self._heap.clear()
+        self._counter = count()
+
+    def _get_priority_value(self, incident: dict) -> int:
+        priority = str(incident.get("priority", "LOW")).upper()
+        return self._PRIORITY_ORDER.get(priority, self._PRIORITY_ORDER["LOW"])

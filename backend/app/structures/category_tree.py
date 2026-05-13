@@ -1,71 +1,69 @@
-from typing import Dict, List, Optional
+class CategoryTree:
+    def __init__(self) -> None:
+        self._categories: dict[str, dict] = {}
+        self._roots: list[str] = []
 
+    def add_category(self, name: str, parent_name: str | None = None) -> None:
+        category_name = self._normalize_name(name)
+        if not category_name:
+            raise ValueError("Category name cannot be empty.")
 
-class CategoryNode:
-    """
-    Represents a node in the category tree.
-    """
+        if category_name in self._categories:
+            return
 
-    def __init__(self, name: str):
-        self.name = name
-        self.children: Dict[str, 'CategoryNode'] = {}
+        if parent_name is None:
+            self._categories[category_name] = {"name": category_name, "children": []}
+            self._roots.append(category_name)
+            return
 
-    def add_child(self, child_name: str) -> 'CategoryNode':
-        if child_name not in self.children:
-            self.children[child_name] = CategoryNode(child_name)
-        return self.children[child_name]
+        parent_category_name = self._normalize_name(parent_name)
+        parent_category = self._categories.get(parent_category_name)
+        if parent_category is None:
+            raise ValueError(f"Parent category '{parent_category_name}' does not exist.")
 
-    def to_dict(self) -> Dict:
+        self._categories[category_name] = {"name": category_name, "children": []}
+        parent_category["children"].append(category_name)
+
+    def find_category(self, name: str) -> dict | None:
+        category_name = self._normalize_name(name)
+        category = self._categories.get(category_name)
+        if category is None:
+            return None
+
+        return self._build_category_dict(category_name)
+
+    def get_tree(self) -> dict:
         return {
-            "name": self.name,
-            "children": [child.to_dict() for child in self.children.values()]
+            "categories": [
+                self._build_category_dict(category_name)
+                for category_name in self._roots
+            ]
         }
 
+    def get_children(self, name: str) -> list[str]:
+        category_name = self._normalize_name(name)
+        category = self._categories.get(category_name)
+        if category is None:
+            return []
 
-class CategoryTree:
-    """
-    Organizes categories and subcategories in a hierarchical tree structure.
-    """
+        return category["children"].copy()
 
-    def __init__(self):
-        self.root = CategoryNode("root")
+    def category_exists(self, name: str) -> bool:
+        return self._normalize_name(name) in self._categories
 
-    def add_category_path(self, path: List[str]) -> None:
-        """
-        Adds a category hierarchy. e.g., ["Infrastructure", "Building A", "Room 101"]
-        """
-        current = self.root
-        for part in path:
-            current = current.add_child(part)
+    def clear(self) -> None:
+        self._categories.clear()
+        self._roots.clear()
 
-    def get_subcategories(self, path: List[str]) -> List[str]:
-        """
-        Returns names of immediate subcategories for a given path.
-        """
-        current = self.root
-        for part in path:
-            if part in current.children:
-                current = current.children[part]
-            else:
-                return []
-        return list(current.children.keys())
+    def _build_category_dict(self, name: str) -> dict:
+        category = self._categories[name]
+        return {
+            "name": category["name"],
+            "children": [
+                self._build_category_dict(child_name)
+                for child_name in category["children"]
+            ],
+        }
 
-    def search_category(self, name: str) -> bool:
-        """
-        Performs a depth-first search to find if a category exists.
-        """
-        return self._search_recursive(self.root, name)
-
-    def _search_recursive(self, node: CategoryNode, name: str) -> bool:
-        if node.name == name:
-            return True
-        for child in node.children.values():
-            if self._search_recursive(child, name):
-                return True
-        return False
-
-    def display(self) -> Dict:
-        """
-        Returns a dictionary representation of the tree.
-        """
-        return self.root.to_dict()
+    def _normalize_name(self, name: str) -> str:
+        return name.strip()

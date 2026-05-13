@@ -4,7 +4,7 @@ Este documento está pensado para cambios rápidos de grupo o integrante. Resume
 
 ## Resumen rápido del proyecto
 
-CampusCare es un sistema académico para gestionar incidentes universitarios. El backend actual permite registrar incidentes, listarlos, consultarlos por ID, actualizar su estado, asignar responsable y consultar temporalmente el siguiente incidente abierto.
+CampusCare es un sistema académico para gestionar incidentes universitarios. El backend actual permite registrar incidentes, listarlos, consultarlos por ID, actualizar su estado, asignar responsable y consultar el siguiente incidente abierto según prioridad.
 
 ## Cómo ejecutar el backend
 
@@ -60,7 +60,7 @@ python -m pytest
 - No hay autenticación.
 - No hay roles de usuario.
 - No hay estructuras avanzadas.
-- No hay cola de prioridad real.
+- La cola de prioridad ya existe, pero funciona sobre datos en memoria.
 - No hay reportes avanzados.
 - No hay persistencia al reiniciar el servidor.
 
@@ -76,9 +76,9 @@ python -m pytest
 
 ### Integrante 2
 
-- Implementar estructuras de datos avanzadas.
-- Integrar `PriorityQueueManager`.
-- Implementar historial con `HistoryStack` si el equipo lo mantiene en el alcance.
+- Mantener y extender estructuras de datos avanzadas si aparecen nuevas reglas.
+- Revisar `PriorityQueueManager` si cambian los criterios de prioridad.
+- Revisar historial con `HistoryStack` si se decide exponerlo públicamente.
 - Implementar clasificación por categorías con `CategoryTree` si aplica.
 - No cambiar rutas públicas sin coordinar con Integrante 1.
 
@@ -102,7 +102,7 @@ python -m pytest
 
 El repositorio actual es en memoria. Los incidentes creados se pierden al reiniciar el servidor.
 
-El endpoint `/api/incidents/queue/next` es temporal. Actualmente devuelve el primer incidente abierto encontrado. La cola de prioridad real debe integrarse después con `PriorityQueueManager`.
+El endpoint `/api/incidents/queue/next` usa `PriorityQueueManager`. Sigue siendo una implementación en memoria y debe revisarse si luego se agrega base de datos o persistencia real.
 
 ## Antes de entregar el turno
 

@@ -12,11 +12,18 @@ from app.schemas.incident_schema import (
     IncidentStatus,
     UrgencyLevel,
 )
+from app.structures.history_stack import IncidentHistoryStack
+from app.structures.priority_queue import PriorityQueueManager
 
 
 class IncidentService:
-    def __init__(self, repository: IncidentRepository | None = None) -> None:
+    def __init__(
+        self,
+        repository: IncidentRepository | None = None,
+        history_stack: IncidentHistoryStack | None = None,
+    ) -> None:
         self.repository = repository or IncidentRepository()
+        self.history_stack = history_stack or IncidentHistoryStack()
 
     def create_incident(self, request: IncidentCreateRequest) -> IncidentResponse:
         incident = {
@@ -34,6 +41,12 @@ class IncidentService:
         }
 
         saved_incident = self.repository.save(incident)
+        self._record_history(
+            incident_id=saved_incident["id"],
+            action="INCIDENT_CREATED",
+            previous_value=None,
+            new_value=saved_incident["status"],
+        )
         return IncidentResponse(**saved_incident)
 
     def get_all_incidents(self) -> list[IncidentResponse]:
@@ -47,30 +60,83 @@ class IncidentService:
         incident_id: str,
         request: IncidentUpdateStatusRequest,
     ) -> IncidentResponse:
+        current_incident = self._get_existing_incident(incident_id)
+        previous_status = current_incident["status"]
+        new_status = request.status.value
+
+        if previous_status == IncidentStatus.CLOSED.value and new_status == IncidentStatus.OPEN.value:
+            raise HTTPException(
+                status_code=400,
+                detail="Closed incidents cannot be reopened.",
+            )
+
         updated_incident = self.repository.update(
             incident_id,
-            {"status": request.status.value},
+            {"status": new_status},
         )
-        return IncidentResponse(**self._ensure_updated(updated_incident))
+        updated_incident = self._ensure_updated(updated_incident)
+        self._record_history(
+            incident_id=incident_id,
+            action="STATUS_CHANGED",
+            previous_value=previous_status,
+            new_value=new_status,
+        )
+        return IncidentResponse(**updated_incident)
 
     def assign_incident(
         self,
         incident_id: str,
         request: IncidentAssignRequest,
     ) -> IncidentResponse:
+        current_incident = self._get_existing_incident(incident_id)
+        if current_incident["status"] == IncidentStatus.CLOSED.value:
+            raise HTTPException(
+                status_code=400,
+                detail="Closed incidents cannot be assigned.",
+            )
+
+        if request.assigned_to is None or not request.assigned_to.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Assigned person or team cannot be empty.",
+            )
+
+        previous_value = current_incident.get("assigned_to")
+        updated_data = {"assigned_to": request.assigned_to}
+        if current_incident["status"] == IncidentStatus.OPEN.value:
+            updated_data["status"] = IncidentStatus.ASSIGNED.value
+
         updated_incident = self.repository.update(
             incident_id,
-            {"assigned_to": request.assigned_to},
+            updated_data,
         )
-        return IncidentResponse(**self._ensure_updated(updated_incident))
+        updated_incident = self._ensure_updated(updated_incident)
+        self._record_history(
+            incident_id=incident_id,
+            action="INCIDENT_ASSIGNED",
+            previous_value=previous_value,
+            new_value=request.assigned_to,
+        )
+        return IncidentResponse(**updated_incident)
 
     def get_next_incident(self) -> IncidentResponse | None:
-        # TODO: Integrate PriorityQueueManager from Team Member 2.
+        priority_queue = PriorityQueueManager()
         for incident in self.repository.find_all():
             if incident["status"] == IncidentStatus.OPEN.value:
-                return IncidentResponse(**incident)
+                priority_queue.add_incident(incident)
 
-        return None
+        next_incident = priority_queue.get_next_incident()
+        if next_incident is None:
+            return None
+
+        return IncidentResponse(**next_incident)
+
+    def get_incident_history(self, incident_id: str) -> list[dict]:
+        return [
+            event
+            for event in self.history_stack.get_events()
+            if event["incident_id"] == incident_id
+        ]
 
     def _get_existing_incident(self, incident_id: str) -> dict:
         incident = self.repository.find_by_id(incident_id)
@@ -87,3 +153,20 @@ class IncidentService:
 
     def _calculate_priority(self, urgency_level: UrgencyLevel) -> str:
         return urgency_level.value
+
+    def _record_history(
+        self,
+        incident_id: str,
+        action: str,
+        previous_value: str | None,
+        new_value: str | None,
+    ) -> None:
+        self.history_stack.push_event(
+            {
+                "incident_id": incident_id,
+                "action": action,
+                "previous_value": previous_value,
+                "new_value": new_value,
+                "created_at": datetime.now(timezone.utc),
+            }
+        )

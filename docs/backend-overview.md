@@ -62,11 +62,11 @@ Formato general:
 
 - `IncidentRepository` guarda datos en un diccionario en memoria.
 - Los datos se pierden al reiniciar el servidor.
-- `get_next_incident` devuelve el primer incidente abierto, no usa una cola de prioridad real.
+- `get_next_incident` usa `PriorityQueueManager`, pero sigue trabajando con datos en memoria.
 - No hay autenticación, roles ni permisos.
 - No hay base de datos.
 - No hay frontend.
 
 ## Punto de integración futuro
 
-El método `get_next_incident` en `IncidentService` contiene un TODO para integrar después `PriorityQueueManager`. Esa integración corresponde al bloque de estructuras avanzadas y no se implementa en este avance.
+El método `get_next_incident` en `IncidentService` ya integra `PriorityQueueManager`. La siguiente integración recomendada es conectar `CategoryTree` a reglas de clasificación y decidir si el historial tendrá endpoints públicos.

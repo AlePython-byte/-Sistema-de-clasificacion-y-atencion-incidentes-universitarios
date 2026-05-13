@@ -31,6 +31,8 @@ Se validó:
 - Validación de payload inválido con error 422.
 - Endpoint temporal para siguiente incidente abierto.
 - Endpoint temporal para siguiente incidente cuando no hay incidentes abiertos.
+- Reglas de prioridad integradas con `PriorityQueueManager`.
+- Historial interno integrado con `IncidentHistoryStack`.
 
 ## Comandos usados
 
@@ -71,8 +73,8 @@ python -m uvicorn app.main:app --reload
 
 ## Qué puede continuar el siguiente grupo
 
-- Integrar una cola de prioridad real en `get_next_incident`.
-- Agregar historial de cambios de estado.
+- Extender la cola de prioridad si aparecen nuevas reglas.
+- Decidir si el historial de cambios de estado tendrá endpoint público.
 - Agregar estructuras avanzadas según el rol del Integrante 2.
 - Mejorar reglas de asignación y reportes según el rol del Integrante 3.
 - Crear frontend que consuma estos endpoints según el rol del Integrante 4.
@@ -86,7 +88,7 @@ python -m uvicorn app.main:app --reload
 - No hay control de permisos.
 - No hay paginación ni filtros avanzados.
 - La prioridad todavía es igual al nivel de urgencia.
-- El endpoint `/api/incidents/queue/next` no usa una cola de prioridad real.
+- El endpoint `/api/incidents/queue/next` usa cola de prioridad, pero solo con datos en memoria.
 
 ## Estado del repositorio en memoria
 

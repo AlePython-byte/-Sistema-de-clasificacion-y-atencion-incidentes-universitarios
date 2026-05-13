@@ -25,8 +25,6 @@ Incluye:
 ## Lo que NO incluye todavía
 
 Este bloque todavía no incluye:
-
-- Frontend.
 - Base de datos real.
 - Autenticación.
 - Roles de usuario.
@@ -72,13 +70,30 @@ campuscare/
 |   |       +-- test_health.py
 |   |       +-- test_incident_routes.py
 |   +-- requirements.txt
+|   +-- docs/
+|   +-- handoff-notes.md
++-- frontend/
+|   +-- app/
+|   |   +-- main.py
+|   |   +-- clients/
+|   |   |   +-- api_client.py
+|   |   +-- pages/
+|   |   |   +-- dashboard_page.py
+|   |   |   +-- incidents_page.py
+|   |   |   +-- queue_page.py
+|   |   +-- components/
+|   |       +-- __init__.py
+|   +-- requirements.txt
 +-- docs/
 |   +-- backend-overview.md
 |   +-- api-endpoints.md
+|   +-- frontend-overview.md
 |   +-- handoff-notes.md
 |   +-- integration-plan.md
 |   +-- team-handoff.md
 |   +-- git-workflow.md
+|   +-- data-structures.md
+|   +-- business-rules.md
 +-- README.md
 +-- .gitignore
 ```
@@ -101,6 +116,20 @@ Si `uvicorn` no se reconoce por el PATH de Windows, usar:
 python -m uvicorn app.main:app --reload
 ```
 
+## Ejecución del Frontend
+
+Una vez que el backend esté corriendo, abre una nueva terminal y ejecuta:
+
+```powershell
+cd frontend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+streamlit run app/main.py
+```
+
+Esto abrirá la aplicación web en tu navegador, lista para usar en español.
+
 ## Acceso a Swagger
 
 Con el servidor encendido, abrir:
@@ -122,7 +151,7 @@ Swagger permite probar los endpoints desde el navegador y ver las validaciones g
 | GET | `/api/incidents/{incident_id}` | Busca un incidente por ID. | Funcional |
 | PATCH | `/api/incidents/{incident_id}/status` | Actualiza el estado de un incidente. | Funcional |
 | PATCH | `/api/incidents/{incident_id}/assign` | Asigna un responsable a un incidente. | Funcional |
-| GET | `/api/incidents/queue/next` | Devuelve el primer incidente abierto encontrado. | Temporal |
+| GET | `/api/incidents/queue/next` | Devuelve el incidente abierto con mayor prioridad. | Funcional en memoria |
 
 ## Ejemplo de creación de incidente
 
@@ -189,7 +218,7 @@ python -m pytest
 Actualmente pasan las pruebas básicas del backend. La última validación ejecutada en este bloque fue:
 
 ```text
-10 passed
+36 passed
 ```
 
 ## Guía rápida para nuevos integrantes
@@ -199,6 +228,8 @@ Antes de continuar el proyecto, revisar estos documentos:
 - `docs/integration-plan.md`: plan para integrar ramas, validar cambios y proteger la estabilidad de `main`.
 - `docs/team-handoff.md`: resumen operativo para cambio de integrante o cambio de grupo.
 - `docs/git-workflow.md`: flujo recomendado de Git para trabajar por ramas y resolver merges.
+- `docs/data-structures.md`: explicación de las estructuras creadas por el Integrante 2.
+- `docs/business-rules.md`: reglas de negocio e integración de estructuras del Integrante 3.
 
 Validación mínima antes de entregar o mezclar cambios:
 
@@ -214,15 +245,15 @@ python -m pytest
 - Se usa Pydantic para validar datos de entrada y salida.
 - Se usa un repositorio en memoria porque la persistencia real será responsabilidad de otro bloque futuro.
 - Se usa una arquitectura por capas para separar rutas, schemas, servicios y repositorios.
-- Se deja `get_next_incident` como implementación temporal hasta integrar una cola de prioridad real.
+- `get_next_incident` usa `PriorityQueueManager`, pero todavía trabaja con el repositorio en memoria.
 
 ## Recomendaciones para los siguientes integrantes
 
 ### Para Integrante 2
 
-- Implementar estructuras de datos avanzadas.
-- Integrar `PriorityQueueManager`.
-- Implementar `HistoryStack`.
+- Mantener y extender estructuras de datos avanzadas si aparecen nuevas reglas.
+- Revisar `PriorityQueueManager` si cambian los criterios de prioridad.
+- Revisar `HistoryStack` si se decide exponer historial públicamente.
 - Implementar `CategoryTree`.
 
 ### Para Integrante 3

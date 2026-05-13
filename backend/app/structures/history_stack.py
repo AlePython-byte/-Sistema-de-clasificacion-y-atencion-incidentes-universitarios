@@ -1,50 +1,30 @@
-from typing import Any, List, Optional
-
-
 class IncidentHistoryStack:
-    """
-    Manages a history of changes using a stack (LIFO).
-    """
+    def __init__(self) -> None:
+        self._events: list[dict] = []
 
-    def __init__(self):
-        self._stack: List[Any] = []
+    def push_event(self, event: dict) -> None:
+        self._events.append(event)
 
-    def push(self, change: Any) -> None:
-        """
-        Adds a change record to the top of the stack.
-        """
-        self._stack.append(change)
-
-    def pop(self) -> Optional[Any]:
-        """
-        Removes and returns the most recent change.
-        """
+    def pop_event(self) -> dict | None:
         if self.is_empty():
             return None
-        return self._stack.pop()
 
-    def peek(self) -> Optional[Any]:
-        """
-        Returns the most recent change without removing it.
-        """
+        return self._events.pop()
+
+    def peek_event(self) -> dict | None:
         if self.is_empty():
             return None
-        return self._stack[-1]
+
+        return self._events[-1]
+
+    def get_events(self) -> list[dict]:
+        return self._events.copy()
 
     def is_empty(self) -> bool:
-        """
-        Returns True if the stack is empty.
-        """
-        return len(self._stack) == 0
+        return len(self._events) == 0
 
     def size(self) -> int:
-        """
-        Returns the number of records in the history.
-        """
-        return len(self._stack)
+        return len(self._events)
 
     def clear(self) -> None:
-        """
-        Clears all history.
-        """
-        self._stack.clear()
+        self._events.clear()
