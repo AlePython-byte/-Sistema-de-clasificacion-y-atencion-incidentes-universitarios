@@ -1,0 +1,6 @@
+customtkinter
+pydantic
+fastapi
+darkdetect
+packaging
+typing-extensions
