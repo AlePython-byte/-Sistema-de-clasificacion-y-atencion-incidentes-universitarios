@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StockFlow - Dashboard de Inventario</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Iconos Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#f4f6f8;
+      color:#172033;
+      overflow-x:hidden;
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    .sidebar-item{
+      width:100%;
+      height:46px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:0 16px;
+      border-radius:12px;
+      color:#697386;
+      transition:.2s ease;
+    }
+
+    .sidebar-item:hover{
+      background:#f2f5ff;
+      color:#315efb;
+    }
+
+    .sidebar-item.active{
+      background:#315efb;
+      color:white;
+      box-shadow:0 8px 22px rgba(49,94,251,.24);
+    }
+
+    .stat-card{
+      background:#fff;
+      border:1px solid #e8ebf0;
+      border-radius:18px;
+      padding:18px;
+      min-height:125px;
+    }
+
+    .stat-icon{
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+    }
+
+    .panel{
+      background:#fff;
+      border:1px solid #e8ebf0;
+      border-radius:18px;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:600;
+    }
+
+    .status-green{
+      color:#138a52;
+      background:#e9f8ef;
+    }
+
+    .status-orange{
+      color:#b26b08;
+      background:#fff4dc;
+    }
+
+    .status-red{
+      color:#c93a48;
+      background:#fdebed;
+    }
+
+    .status-blue{
+      color:#315efb;
+      background:#edf2ff;
+    }
+
+    .progress-track{
+      height:8px;
+      width:100%;
+      background:#edf0f4;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .progress-fill{
+      height:100%;
+      border-radius:999px;
+    }
+
+    .table-row:hover{
+      background:#fafbfc;
+    }
+
+    @media(max-width:980px){
+      .app{
+        grid-template-columns:80px minmax(0,1fr)!important;
+      }
+
+      .sidebar-text,
+      .logo-text,
+      .section-title,
+      .profile-text{
+        display:none;
+      }
+
+      .sidebar-item{
+        justify-content:center;
+        padding:0;
+      }
+
+      .summary-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      }
+
+      .content-grid{
+        grid-template-columns:1fr!important;
+      }
+    }
+
+    @media(max-width:640px){
+      .app{
+        grid-template-columns:1fr!important;
+      }
+
+      .sidebar{
+        display:none!important;
+      }
+
+      .summary-grid{
+        grid-template-columns:1fr!important;
+      }
+
+      .topbar{
+        flex-wrap:wrap;
+      }
+
+      .search-box{
+        order:3;
+        width:100%!important;
+        max-width:none!important;
+      }
+
+      .page-actions{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app min-h-screen grid" style="grid-template-columns:230px minmax(0,1fr);">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar bg-white border-r border-[#e8ebf0] p-4 flex flex-col min-h-screen">
+
+    <div class="h-14 flex items-center gap-3 px-2 mb-5">
+      <div class="w-10 h-10 rounded-xl bg-[#315efb] text-white grid place-items-center">
+        <i data-lucide="package-check" class="w-6 h-6"></i>
+      </div>
+      <div class="logo-text">
+        <h1 class="font-bold text-xl leading-5">StockFlow</h1>
+        <p class="text-[11px] text-[#929aaa] mt-1">Inventory Manager</p>
+      </div>
+    </div>
+
+    <p class="section-title text-xs uppercase tracking-[.16em] text-[#a2a9b7] px-4 mb-2">
+      Principal
+    </p>
+
+    <nav class="space-y-2">
+      <button class="sidebar-item active" data-page="Resumen">
+        <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Resumen</span>
+      </button>
+
+      <button class="sidebar-item" data-page="Productos">
+        <i data-lucide="boxes" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Productos</span>
+      </button>
+
+      <button class="sidebar-item" data-page="Categorías">
+        <i data-lucide="tags" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Categorías</span>
+      </button>
+
+      <button class="sidebar-item" data-page="Proveedores">
+        <i data-lucide="truck" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Proveedores</span>
+      </button>
+
+      <button class="sidebar-item" data-page="Movimientos">
+        <i data-lucide="arrow-left-right" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Movimientos</span>
+      </button>
+
+      <button class="sidebar-item" data-page="Reportes">
+        <i data-lucide="bar-chart-3" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Reportes</span>
+      </button>
+    </nav>
+
+    <div class="border-t border-[#eceef2] my-5"></div>
+
+    <p class="section-title text-xs uppercase tracking-[.16em] text-[#a2a9b7] px-4 mb-2">
+      Sistema
+    </p>
+
+    <nav class="space-y-2">
+      <button class="sidebar-item">
+        <i data-lucide="settings" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Configuración</span>
+      </button>
+
+      <button class="sidebar-item">
+        <i data-lucide="circle-help" class="w-5 h-5 shrink-0"></i>
+        <span class="sidebar-text text-sm font-semibold">Ayuda</span>
+      </button>
+    </nav>
+
+    <button class="sidebar-item mt-auto">
+      <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+      <span class="sidebar-text text-sm font-semibold">Cerrar sesión</span>
+    </button>
+  </aside>
+
+
+  <!-- MAIN -->
+  <main class="min-w-0">
+
+    <!-- TOPBAR -->
+    <header class="topbar h-auto min-h-[76px] bg-white border-b border-[#e8ebf0] px-6 py-4 flex items-center gap-4">
+
+      <div class="search-box relative w-full max-w-[420px]">
+        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8f98a8]"></i>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Buscar producto, SKU o categoría..."
+          class="w-full h-11 pl-11 pr-4 rounded-xl border border-[#e4e8ee] bg-[#f9fafb] outline-none text-sm focus:border-[#315efb]"
+        >
+      </div>
+
+      <div class="ml-auto flex items-center gap-3">
+        <button class="w-11 h-11 rounded-xl border border-[#e4e8ee] grid place-items-center text-[#667085] relative">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></span>
+        </button>
+
+        <div class="w-px h-9 bg-[#e6e9ee]"></div>
+
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-[#dfe7ff] text-[#315efb] grid place-items-center font-bold">
+            AP
+          </div>
+          <div class="profile-text">
+            <p class="font-semibold text-sm">Alejandro Parra</p>
+            <p class="text-xs text-[#8c95a5]">Administrador</p>
+          </div>
+          <i data-lucide="chevron-down" class="profile-text w-4 h-4 text-[#8c95a5]"></i>
+        </div>
+      </div>
+
+    </header>
+
+
+    <!-- PAGE CONTENT -->
+    <div class="p-6">
+
+      <!-- TITLE -->
+      <section class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <p class="text-sm text-[#8c95a5] mb-1">Martes, 22 de septiembre</p>
+          <h2 id="pageTitle" class="text-2xl font-bold">Resumen de inventario</h2>
+          <p class="text-sm text-[#8c95a5] mt-1">Control general de productos y existencias.</p>
+        </div>
+
+        <div class="page-actions flex items-center gap-3">
+          <button class="h-11 px-4 rounded-xl border border-[#dfe3ea] bg-white text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Exportar
+          </button>
+
+          <button id="newProductButton" class="h-11 px-4 rounded-xl bg-[#315efb] text-white text-sm font-semibold flex items-center gap-2 shadow-[0_8px_20px_rgba(49,94,251,.25)]">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Nuevo producto
+          </button>
+        </div>
+      </section>
+
+
+      <!-- SUMMARY -->
+      <section class="summary-grid grid grid-cols-4 gap-4 mb-6">
+
+        <article class="stat-card">
+          <div class="flex items-start justify-between">
+            <span class="stat-icon bg-[#edf2ff] text-[#315efb]">
+              <i data-lucide="boxes" class="w-5 h-5"></i>
+            </span>
+            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">+8.2%</span>
+          </div>
+
+          <div class="mt-4">
+            <p class="text-sm text-[#8c95a5]">Total productos</p>
+            <div class="flex items-end gap-2 mt-1">
+              <strong class="text-3xl leading-none">1,248</strong>
+              <span class="text-xs text-[#9aa2b1] mb-1">unidades</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="flex items-start justify-between">
+            <span class="stat-icon bg-[#eaf8f0] text-[#1aa05e]">
+              <i data-lucide="badge-check" class="w-5 h-5"></i>
+            </span>
+            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">+4.5%</span>
+          </div>
+
+          <div class="mt-4">
+            <p class="text-sm text-[#8c95a5]">Stock disponible</p>
+            <div class="flex items-end gap-2 mt-1">
+              <strong class="text-3xl leading-none">986</strong>
+              <span class="text-xs text-[#9aa2b1] mb-1">items</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="flex items-start justify-between">
+            <span class="stat-icon bg-[#fff4df] text-[#d48713]">
+              <i data-lucide="triangle-alert" class="w-5 h-5"></i>
+            </span>
+            <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded-full">12 nuevos</span>
+          </div>
+
+          <div class="mt-4">
+            <p class="text-sm text-[#8c95a5]">Stock bajo</p>
+            <div class="flex items-end gap-2 mt-1">
+              <strong class="text-3xl leading-none">42</strong>
+              <span class="text-xs text-[#9aa2b1] mb-1">productos</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="flex items-start justify-between">
+            <span class="stat-icon bg-[#fdecef] text-[#df4759]">
+              <i data-lucide="circle-x" class="w-5 h-5"></i>
+            </span>
+            <span class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">Atención</span>
+          </div>
+
+          <div class="mt-4">
+            <p class="text-sm text-[#8c95a5]">Agotados</p>
+            <div class="flex items-end gap-2 mt-1">
+              <strong class="text-3xl leading-none">18</strong>
+              <span class="text-xs text-[#9aa2b1] mb-1">productos</span>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+
+      <!-- CONTENT GRID -->
+      <section class="content-grid grid gap-5 mb-6" style="grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);">
+
+        <!-- STOCK ACTIVITY -->
+        <article class="panel p-5">
+          <div class="flex items-center justify-between gap-4 mb-5">
+            <div>
+              <h3 class="font-bold text-lg">Movimiento de stock</h3>
+              <p class="text-xs text-[#929aaa] mt-1">Entradas y salidas durante la semana</p>
+            </div>
+
+            <button class="h-9 px-3 rounded-lg border border-[#e3e7ed] text-xs text-[#667085] flex items-center gap-2">
+              Últimos 7 días
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- gráfico hecho con CSS/HTML -->
+          <div class="h-[255px] flex items-end gap-4 px-2 border-b border-[#e8ebf0]">
+            <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+              <div class="w-full max-w-10 bg-[#dbe4ff] rounded-t-lg" style="height:38%;"></div>
+              <span class="text-xs text-[#8d96a6]">Lun</span>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+              <div class="w-full max-w-10 bg-[#9fb5ff] rounded-t-lg" style="height:58%;"></div>
+              <span class="text-xs text-[#8d96a6]">Mar</span>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+              <div class="w-full max-w-10 bg-[#315efb] rounded-t-lg" style="height:80%;"></div>
+              <span class="text-xs text-[#8d96a6]">Mié</span>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+              <div class="w-full max-w-10 bg-[#6f8dfd] rounded-t-lg" style="height:65%;"></div>
+              <span class="text-xs text-[#8d96a6]">Jue</span>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+              <div class="w-full max-w-10 bg-[#315efb] rounded-t-lg" style="height:92%;"></div>
+              <span class="text-xs text-[#8d96a6]">Vie</span>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+              <div class="w-full max-w-10 bg-[#b8c7ff] rounded-t-lg" style="height:47%;"></div>
+              <span class="text-xs text-[#8d96a6]">Sáb</span>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-end h-full gap-2">
+              <div class="w-full max-w-10 bg-[#dbe4ff] rounded-t-lg" style="height:30%;"></div>
+              <span class="text-xs text-[#8d96a6]">Dom</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-6 mt-5">
+            <div class="flex items-center gap-2 text-xs text-[#697386]">
+              <span class="w-3 h-3 rounded-full bg-[#315efb]"></span>
+              Entradas
+            </div>
+
+            <div class="flex items-center gap-2 text-xs text-[#697386]">
+              <span class="w-3 h-3 rounded-full bg-[#b8c7ff]"></span>
+              Salidas
+            </div>
+          </div>
+        </article>
+
+
+        <!-- CATEGORIES -->
+        <article class="panel p-5">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="font-bold text-lg">Categorías</h3>
+              <p class="text-xs text-[#929aaa] mt-1">Distribución del inventario</p>
+            </div>
+            <button class="text-xs font-semibold text-[#315efb]">Ver todas</button>
+          </div>
+
+          <div class="space-y-5">
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span>Electrónica</span>
+                <span class="font-semibold">38%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill bg-[#315efb]" style="width:38%;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span>Accesorios</span>
+                <span class="font-semibold">27%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill bg-[#31b27c]" style="width:27%;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span>Hogar</span>
+                <span class="font-semibold">18%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill bg-[#f4aa3c]" style="width:18%;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span>Oficina</span>
+                <span class="font-semibold">11%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill bg-[#a477e8]" style="width:11%;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span>Otros</span>
+                <span class="font-semibold">6%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill bg-[#98a1af]" style="width:6%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-[#f7f9fc] rounded-xl">
+            <p class="text-xs text-[#929aaa]">Valor total del inventario</p>
+            <div class="flex items-end justify-between gap-3 mt-1">
+              <strong class="text-2xl">$128.450.000</strong>
+              <span class="status status-green">+5.8%</span>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+
+      <!-- TABLE -->
+      <section class="panel overflow-hidden">
+
+        <div class="p-5 border-b border-[#e8ebf0] flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="font-bold text-lg">Productos recientes</h3>
+            <p class="text-xs text-[#929aaa] mt-1">Últimos productos registrados en el sistema</p>
+          </div>
+
+          <div class="flex gap-2">
+            <button class="filter-button h-9 px-3 rounded-lg bg-[#315efb] text-white text-xs font-semibold" data-filter="all">
+              Todos
+            </button>
+
+            <button class="filter-button h-9 px-3 rounded-lg border border-[#dfe3ea] text-xs font-semibold" data-filter="low">
+              Stock bajo
+            </button>
+
+            <button class="filter-button h-9 px-3 rounded-lg border border-[#dfe3ea] text-xs font-semibold" data-filter="out">
+              Agotados
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[760px] text-sm">
+
+            <thead class="bg-[#f8f9fb] text-[#87909f]">
+              <tr>
+                <th class="text-left font-semibold px-5 py-4">Producto</th>
+                <th class="text-left font-semibold px-5 py-4">SKU</th>
+                <th class="text-left font-semibold px-5 py-4">Categoría</th>
+                <th class="text-left font-semibold px-5 py-4">Stock</th>
+                <th class="text-left font-semibold px-5 py-4">Precio</th>
+                <th class="text-left font-semibold px-5 py-4">Estado</th>
+                <th class="text-right font-semibold px-5 py-4">Acción</th>
+              </tr>
+            </thead>
+
+            <tbody id="productTable" class="divide-y divide-[#eef0f3]">
+
+              <tr class="table-row" data-status="ok">
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-[#edf2ff] text-[#315efb] grid place-items-center">
+                      <i data-lucide="headphones" class="w-5 h-5"></i>
+                    </span>
+                    <div>
+                      <p class="font-semibold">Audífonos Pro X</p>
+                      <p class="text-xs text-[#929aaa]">Bluetooth 5.3</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-4 text-[#697386]">AUD-2481</td>
+                <td class="px-5 py-4 text-[#697386]">Electrónica</td>
+                <td class="px-5 py-4 font-semibold">84</td>
+                <td class="px-5 py-4 font-semibold">$249.900</td>
+                <td class="px-5 py-4"><span class="status status-green">Disponible</span></td>
+                <td class="px-5 py-4 text-right">
+                  <button class="w-9 h-9 rounded-lg border border-[#e2e6ec] grid place-items-center ml-auto">
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <tr class="table-row" data-status="low">
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-[#fff4df] text-[#d48713] grid place-items-center">
+                      <i data-lucide="mouse" class="w-5 h-5"></i>
+                    </span>
+                    <div>
+                      <p class="font-semibold">Mouse Wireless S2</p>
+                      <p class="text-xs text-[#929aaa]">Ergonómico</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-4 text-[#697386]">MOU-1029</td>
+                <td class="px-5 py-4 text-[#697386]">Accesorios</td>
+                <td class="px-5 py-4 font-semibold">9</td>
+                <td class="px-5 py-4 font-semibold">$89.900</td>
+                <td class="px-5 py-4"><span class="status status-orange">Stock bajo</span></td>
+                <td class="px-5 py-4 text-right">
+                  <button class="w-9 h-9 rounded-lg border border-[#e2e6ec] grid place-items-center ml-auto">
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <tr class="table-row" data-status="out">
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-[#fdecef] text-[#df4759] grid place-items-center">
+                      <i data-lucide="keyboard" class="w-5 h-5"></i>
+                    </span>
+                    <div>
+                      <p class="font-semibold">Teclado Mecánico K8</p>
+                      <p class="text-xs text-[#929aaa]">Switch Red</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-4 text-[#697386]">TEC-5317</td>
+                <td class="px-5 py-4 text-[#697386]">Accesorios</td>
+                <td class="px-5 py-4 font-semibold">0</td>
+                <td class="px-5 py-4 font-semibold">$319.900</td>
+                <td class="px-5 py-4"><span class="status status-red">Agotado</span></td>
+                <td class="px-5 py-4 text-right">
+                  <button class="w-9 h-9 rounded-lg border border-[#e2e6ec] grid place-items-center ml-auto">
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <tr class="table-row" data-status="ok">
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-[#eaf8f0] text-[#1aa05e] grid place-items-center">
+                      <i data-lucide="monitor" class="w-5 h-5"></i>
+                    </span>
+                    <div>
+                      <p class="font-semibold">Monitor 24 pulgadas</p>
+                      <p class="text-xs text-[#929aaa]">IPS Full HD</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-4 text-[#697386]">MON-8842</td>
+                <td class="px-5 py-4 text-[#697386]">Electrónica</td>
+                <td class="px-5 py-4 font-semibold">36</td>
+                <td class="px-5 py-4 font-semibold">$649.900</td>
+                <td class="px-5 py-4"><span class="status status-green">Disponible</span></td>
+                <td class="px-5 py-4 text-right">
+                  <button class="w-9 h-9 rounded-lg border border-[#e2e6ec] grid place-items-center ml-auto">
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+</div>
+
+
+<script>
+  lucide.createIcons();
+
+  // 1. Navegación lateral
+  const sidebarItems = document.querySelectorAll(".sidebar-item[data-page]");
+  const pageTitle = document.getElementById("pageTitle");
+
+  sidebarItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      sidebarItems.forEach((button) => button.classList.remove("active"));
+      item.classList.add("active");
+
+      const page = item.dataset.page;
+      pageTitle.textContent = page === "Resumen" ? "Resumen de inventario" : page;
+    });
+  });
+
+
+  // 2. Buscador simple sobre la tabla
+  const searchInput = document.getElementById("searchInput");
+  const tableRows = document.querySelectorAll("#productTable .table-row");
+
+  searchInput.addEventListener("input", () => {
+    const value = searchInput.value.toLowerCase().trim();
+
+    tableRows.forEach((row) => {
+      const content = row.textContent.toLowerCase();
+      row.style.display = content.includes(value) ? "" : "none";
+    });
+  });
+
+
+  // 3. Filtros
+  const filterButtons = document.querySelectorAll(".filter-button");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+
+      filterButtons.forEach((item) => {
+        item.classList.remove("bg-[#315efb]", "text-white");
+        item.classList.add("border", "border-[#dfe3ea]");
+      });
+
+      button.classList.remove("border", "border-[#dfe3ea]");
+      button.classList.add("bg-[#315efb]", "text-white");
+
+      const filter = button.dataset.filter;
+
+      tableRows.forEach((row) => {
+        const status = row.dataset.status;
+
+        if (filter === "all") {
+          row.style.display = "";
+        } else {
+          row.style.display = status === filter ? "" : "none";
+        }
+      });
+    });
+  });
+
+
+  // 4. Nuevo producto
+  document.getElementById("newProductButton").addEventListener("click", () => {
+    alert("Aquí abrirías el formulario para registrar un nuevo producto.");
+  });
+</script>
+
+</body>
+</html>
